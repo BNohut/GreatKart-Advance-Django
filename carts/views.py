@@ -30,7 +30,7 @@ def add_cart(request, product_id):
 
     try:
         cart = Cart.objects.get(cart_id=_cart_id(request))  # Get the cart using the cart_id present in the session
-    except Cart.ObjectDoesNotExist:
+    except Cart.DoesNotExist:
         cart = Cart.objects.create(
             cart_id=_cart_id(request)
         )
@@ -102,7 +102,7 @@ def remove_cart_item(request, product_id, cart_item_id):
     return redirect('cart')
 
 
-def cart(request, total=0, quantity=0, cart_items=None):
+def cart(request, total=0, tax=0, quantity=0, grand_total=0, cart_items=None):
     try:
         cart = Cart.objects.get(cart_id=_cart_id(request))
         cart_items = CartItem.objects.filter(cart=cart, is_active=True)
@@ -111,7 +111,7 @@ def cart(request, total=0, quantity=0, cart_items=None):
             quantity += cart_item.quantity
         tax = float("{:.2f}".format((18 * total)/100))
         grand_total = float("{:.2f}".format(total + tax))
-    except ObjectDoesNotExist:
+    except Cart.DoesNotExist:
         pass  # just ignore
 
     context = {

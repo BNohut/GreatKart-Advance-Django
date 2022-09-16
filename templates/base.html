@@ -83,11 +83,21 @@ $(document).ready(function() {
   	<div class="col-lg-3 col-sm-6 col-8 order-2 order-lg-3">
   				<div class="d-flex justify-content-end mb-3 mb-lg-0">
   					<div class="widget-header">
-  						<small class="title text-muted">Welcome guest!</small>
-  						<div>
-  							<a href="./signin.html">Sign in</a> <span class="dark-transp"> | </span>
-  							<a href="./register.html"> Register</a>
+						{% if user.is_authenticated %}
+						<small class="title text-muted">Welcome {{user.first_name | capfirst}}!</small>
+						<div>
+							<a href="{% url 'dashboard' %}"> DashBoard</a><span class="dark-transp"> | </span>
+  							<a href="{% url 'logout' %}">Log Out</a>
   						</div>
+						{% else %}
+  						<small class="title text-muted">Welcome Guest!</small>
+
+						<div>
+  							<a href="{% url 'login' %}">Sign in</a> <span class="dark-transp"> | </span>
+  							<a href="{% url 'register' %}"> Register</a>
+  						</div>
+						{% endif %}
+
   					</div>
   					<a href="{% url 'cart' %}" class="widget-header pl-3 ml-3">
   						<div class="icon icon-sm rounded-circle border"><i class="fa fa-shopping-cart"></i></div>
@@ -95,9 +105,12 @@ $(document).ready(function() {
   					</a>
   				</div> <!-- widgets-wrap.// -->
   			</div> <!-- col.// -->
+
   </div> <!-- row.// -->
   	</div> <!-- container.// -->
   </section> <!-- header-main .// -->
   </header> <!-- section-header.// -->
 
+
 {% block content %} {% endblock %}
+{% include 'includes/_footer.html' %}
