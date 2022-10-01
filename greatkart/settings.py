@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'accounts',
     'store',
     'carts',
+    'orders'
 ]
 
 MIDDLEWARE = [
@@ -147,5 +148,5 @@ MESSAGE_TAGS = {
 EMAIL_HOST = '173.194.193.108'
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'forpythoncoding@gmail.com'
-EMAIL_HOST_PASSWORD = 'your_16digits_password'
+EMAIL_HOST_PASSWORD = 'hrcreifdlhtmxmwi'
 EMAIL_USE_TLS = True

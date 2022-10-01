@@ -3,14 +3,15 @@ from django.contrib.auth.decorators import login_required
 from .forms import RegistrationForm
 from .models import Account
 from django.contrib import messages, auth
-
-
+from carts.views import _cart_id
+from carts.models import Cart, CartItem
 from django.template.loader import render_to_string
 from django.contrib.sites.shortcuts import get_current_site
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import EmailMessage
+import requests
 
 
 def register(request):
@@ -57,10 +58,58 @@ def login(request):
         password = request.POST['password']
         user = auth.authenticate(email=email, password=password)
         if user is not None:
-            print('found')
+            try:
+                cart = Cart.objects.get(cart_id=_cart_id(request))
+                is_cart_item_exists = CartItem.objects.filter(cart=cart).exists()
+                if is_cart_item_exists:
+                    cart_item = CartItem.objects.filter(cart=cart)
+
+                    # Getting the product variation by the card id
+                    product_variation = []
+                    for item in cart_item:
+                        variation = item.variations.all()
+                        product_variation.append(list(variation))
+
+                    # Get the cart items from the user to access his product variations
+                    cart_item = CartItem.objects.filter(user=user)
+                    existing_variation_list = []
+                    id = []
+                    for item in cart_item:
+                        existing_variation = item.variations.all()
+                        existing_variation_list.append(list(existing_variation))
+                        id.append(item.id)
+
+                    for pr in product_variation:
+                        if pr in existing_variation_list:
+                            index = existing_variation_list.index(pr)
+                            item_id = id[index]
+                            item = CartItem.objects.get(id=item_id)
+                            item.quantity += 1
+                            item.user = user
+                            item.save()
+                        else:
+                            cart_item = CartItem.objects.filter(cart=cart)
+                            for item in cart_item:
+                                item.user = user
+                                item.save()
+            except:
+                pass
             auth.login(request, user)
-            # messages.success(request, 'You are now logged in.')
-            return redirect('home')
+            messages.success(request, 'You are now logged in.')
+            # redirect user to previous page, if that page has login_required decorator
+            url = request.META.get('HTTP_REFERER')
+            try:
+                print('its in try block')
+                query = requests.utils.urlparse(url).query
+                print(query)
+                params = dict(x.split('=') for x in query.split('&'))
+                print(params)
+                if 'next' in params:
+                    next_page = params['next']
+                    return redirect(next_page)
+            except:
+                print('its in except')
+                return redirect('home')
         else:
             messages.error(request, 'Invalid login credentials')
             return redirect('login')
