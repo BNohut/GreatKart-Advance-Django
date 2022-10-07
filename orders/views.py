@@ -48,7 +48,7 @@ def payments(request):
         order_product.ordered = True
         order_product.save()
 
-        # Take all variation variables for each particular item in order
+    # Take all variation variables for each particular item in order
         cart_item = CartItem.objects.get(id=item.id)
         product_variation = cart_item.variations.all()
         order_product = OrderProduct.objects.get(id=order_product.id)
@@ -63,7 +63,6 @@ def payments(request):
     # Clear Cart
     CartItem.objects.filter(user=request.user).delete()
     # Send order recieved email to costumer
-    current_site = get_current_site(request)
     user = request.user
     mail_subject = "GreatKart | Thank You!"
     message = render_to_string('orders/order_received.html', {
@@ -74,8 +73,14 @@ def payments(request):
     send_email = EmailMessage(mail_subject, message, to=[to_email])
     send_email.send()
     # Send order number and transaction id back to send Data method via JsonResponse
-
-    return render(request, 'orders/payments.html')
+    total = 0
+    quantity = 0
+    for cart_item in cart_items:
+        total += (cart_item.product.price * cart_item.quantity)
+        quantity += cart_item.quantity
+    tax = float("{:.2f}".format((18 * total) / 100))
+    grand_total = float("{:.2f}".format(total + tax))
+    return render(request, 'orders/order_complete.html', {'order': order, 'cart_items': cart_items, 'total':total, 'tax': tax, 'grand_total':grand_total})
 
 
 @login_required(login_url='login')

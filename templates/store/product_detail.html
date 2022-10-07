@@ -10,11 +10,18 @@
 	<div class="row no-gutters">
 		<aside class="col-md-6">
 <article class="gallery-wrap"> 
-	<div class="img-big-wrap">
-	   <a href="#"><img src="{{ single_product.images.url }}"></a>
+	<div class="img-big-wrap mainImage">
+	   <center><img src="{{ single_product.images.url }}"></center>
 	</div> <!-- img-big-wrap.// -->
-	
 </article> <!-- gallery-wrap .end// -->
+			<ul class="thumb">
+				<li>
+					<a href="{{ single_product.images.url }}" target="mainImage"><img src="{{ single_product.images.url }}" alt="Product Image"></a>
+					{% for i in product_gallery %}
+					<a href="{{ i.image.url }}" target="mainImage"><img src="{{ i.image.url }}" alt="Product Image"></a>
+					{% endfor %}
+				</li>
+			</ul>
 		</aside>
 		<main class="col-md-6 border-left">
 			<form action="{% url 'add_cart' single_product.id %} " method="POST">
@@ -22,7 +29,7 @@
 <article class="content-body">
 
 <h2 class="title">{{single_product.product_name}}</h2>
-<div>
+<div class="rating-star">
 	<span  style="color: #F1D731">
 		<i class="fa fa-star{% if single_product.average_review < 0.5 %}-o{% elif single_product.average_review >= 0.5 and single_product.average_review < 1 %}-half-o{% endif %}" aria-hidden="true"></i>
 		<i class="fa fa-star{% if single_product.average_review < 1.5 %}-o{% elif single_product.average_review >= 1.5 and single_product.average_review < 2 %}-half-o{% endif %}" aria-hidden="true"></i>
@@ -107,7 +114,7 @@
 				<input type="text" class="form-control" name="subject" >
 				<br>
 				Review:
-				<textarea name="review" rows="4"class="form-control"></textarea>
+				<textarea name="review" rows="4" class="form-control"></textarea>
 <br>
 				{% if user.is_authenticated %}
 					{% if orderproduct %}
@@ -133,7 +140,7 @@
 <!--			<img src="{% static './images/avatars/avatar1.jpg' %}" class="img-xs icon rounded-circle">-->
 			<div class="text">
 				<span class="date text-muted float-md-right">{{ review.updated_date }} </span>
-				<h6 class="mb-1">{{review.user.first_name}} {{review.user.last_name}} </h6>
+				<h6 class="mb-1">{{review.user.full_name}}</h6>
 				<div>
 					<span  style="color: #F1D731">
 						<i class="fa fa-star{% if review.rating == 0.5 %}-half-o{% elif review.rating < 1 %}-o{% endif %}" aria-hidden="true"></i>
